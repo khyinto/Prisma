@@ -1,14 +1,19 @@
 const express = require("express");
 let bodyParser = require("body-parser");
-const { PrismaClient } = require("@prisma/client");
+//const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
+const userRouter = require("./routes/user");
+
+//const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "2mb" })); //파서(기본)
 app.use(bodyParser.json()); //파서(json)
 
+app.use("/users", userRouter);
+
+/*
 app.get("/users", async (req, res) => {
   const users = await prisma.user.findMany();
   res.json(users);
@@ -32,5 +37,6 @@ app.post("/users", async (req, res) => {
   });
   res.json(user);
 });
+*/
 
 app.listen(3000, () => console.log("Server is running"));
