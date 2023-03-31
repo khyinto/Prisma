@@ -30,17 +30,8 @@ class User_Controller {
     const { email, name } = JSON.parse(JSON.stringify(req.body));
     const result = await prisma
       .$transaction(async (prisma) => {
-        const existingUser = await prisma.user
-          .findUnique({ where: { email } })
-          .catch((err) => {
-            utils.Error(res, "Error creating user");
-          });
-
-        if (existingUser) {
-          //utils.Error(res, "User with this email already exists");
-        }
-
-        const user = await prisma.user.create({
+        await prisma.user.findUnique({ where: { email } });
+        await prisma.user.create({
           data: {
             name,
             email,
@@ -63,21 +54,36 @@ class User_Controller {
   /* ------------------------------------------------------------------------------------- */
   // update post title
   async updatePostTile(req, res) {
-    // 구조 분해
-    // const { id, title } = JSON.parse(JSON.stringify(req.body));
+    // 배열로 데이터를 받을 때
+    const groups = JSON.parse(JSON.stringify(req.body));
+    if (Array.isArray(groups)) {
+      await prisma
+        .$transaction(async (prisma) => {
+          for (let data of groups) {
+            const _id = data.id;
+            const _title = data.title;
 
-    const groups = [
-      { id: parseInt(1), title: "HaHaHaHaHaHa" },
-      { id: parseInt(20), title: "HoHoHoHHoHHoH" },
-    ];
+            await prisma.user.findUnique({
+              where: { id: parseInt(_id) },
+            });
+            await prisma.post.update({
+              where: { id: parseInt(_id) },
+              data: { title: _title },
+            });
+          }
+          utils.Success(res, "Is Array Successfully updated");
+        })
+        .catch((err) => {
+          utils.Error(res, "Error updated ");
+        });
+    }
 
-    await prisma
-      .$transaction(async (prisma) => {
-        for (let data of groups) {
-          const _id = data.id;
-          const _title = data.title;
-          console.log(_id);
-          console.log(_title);
+    // 단일 데이터를 받을때.
+    else {
+      await prisma
+        .$transaction(async (prisma) => {
+          const _id = groups.id;
+          const _title = groups.title;
 
           await prisma.user.findUnique({
             where: { id: parseInt(_id) },
@@ -86,22 +92,12 @@ class User_Controller {
             where: { id: parseInt(_id) },
             data: { title: _title },
           });
-        }
-        /*
-        await prisma.post.update(
-          {
-            where: { id: parseInt(id) },
-            data: { title: title },
-          }.catch((err) => {
-            utils.Error(res, "User not found");
-          })
-        );
-        */
-        utils.send(res, "Successfully updated");
-      })
-      .catch((err) => {
-        utils.send(res, "Error updated ");
-      });
+          utils.Success(res, "Is Single Successfully updated");
+        })
+        .catch((err) => {
+          utils.Error(res, "Error updated ");
+        });
+    }
   }
   /* ------------------------------------------------------------------------------------- */
 }
