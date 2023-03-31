@@ -8,7 +8,7 @@ class User_Controller {
     this.router = express.Router();
     this.router.get("/", this.getAllUsers.bind(this));
     this.router.post("/join", this.createUsers.bind(this));
-    this.router.post("/post_title", this.updatePostTile.bind(this));
+    this.router.put("/post_title", this.updatePostTile.bind(this));
   }
 
   /* ------------------------------------------------------------------------------------- */
@@ -55,6 +55,7 @@ class User_Controller {
   // update post title
   async updatePostTile(req, res) {
     // 배열로 데이터를 받을 때
+    console.log(`Your IP address is ${req.ip}`);
     const groups = JSON.parse(JSON.stringify(req.body));
     if (Array.isArray(groups)) {
       await prisma
