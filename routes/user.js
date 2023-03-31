@@ -47,26 +47,23 @@ router.post("/post_title", async (req, res) => {
   // 구조 분해
   const { id, title } = JSON.parse(JSON.stringify(req.body));
 
-  try {
-    const users = await prisma.user.findUnique({ where: { id: id } });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const updatePost = await prisma.post.update({
-      where: { id },
-      data: { title: title },
-    });
-
-    if (updatePost === null) {
-      res.status(404).json({ message: "User not found" });
-      result;
-    }
-  } catch (err) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+  //try {
+  const result = await prisma.user.findUnique({ where: { id: parseInt(id) } });
+  if (result === null) {
+    utils.Error(res, "User with this");
+    return;
   }
-  utils.send(res, result);
+
+  const updatePost = await prisma.post.update({
+    where: { id: parseInt(id) },
+    data: { title: title },
+  });
+
+  if (updatePost === null) {
+    utils.Error(res, "User not found");
+    return;
+  }
+  utils.send(res, "Successfully updated");
 });
 
 module.exports = router;

@@ -3,6 +3,7 @@ let bodyParser = require("body-parser");
 //const { PrismaClient } = require("@prisma/client");
 
 const userRouter = require("./routes/user");
+const User_Controller = require("./controllers/user_controller");
 
 //const prisma = new PrismaClient();
 const app = express();
@@ -11,7 +12,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "2mb" })); //파서(기본)
 app.use(bodyParser.json()); //파서(json)
 
-app.use("/users", userRouter);
+//app.use("/users", userRouter);
+const user_controller = new User_Controller();
+app.use("/users", user_controller.router);
 
 /*
 app.get("/users", async (req, res) => {
