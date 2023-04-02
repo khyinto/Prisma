@@ -1,10 +1,9 @@
 const utils = require("../lib/utils");
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 
-class User_Controller {
-  constructor() {
+class UserController {
+  constructor(prisma) {
+    this.prisma = prisma;
     this.router = express.Router();
     this.router.get("/", this.getAllUsers.bind(this));
     this.router.post("/join", this.createUsers.bind(this));
@@ -14,11 +13,16 @@ class User_Controller {
   /* ------------------------------------------------------------------------------------- */
   // get all users
   async getAllUsers(req, res) {
-    const users = await prisma.user.findMany();
+    const users = await this.prisma.user.findMany();
     if (users === null) {
       utils.Error(res, "User not found");
       return;
     }
+
+    if (users.Length === 0) {
+      utils.Error(res, "User Length is 0");
+    }
+
     utils.Success(res, users);
   }
   /* ------------------------------------------------------------------------------------- */
@@ -28,7 +32,7 @@ class User_Controller {
   async createUsers(req, res) {
     // 구조 분해
     const { email, name } = JSON.parse(JSON.stringify(req.body));
-    const result = await prisma
+    const result = await this.prisma
       .$transaction(async (prisma) => {
         await prisma.user.findUnique({ where: { email } });
         await prisma.user.create({
@@ -55,19 +59,18 @@ class User_Controller {
   // update post title
   async updatePostTile(req, res) {
     // 배열로 데이터를 받을 때
-    console.log(`Your IP address is ${req.ip}`);
-    const groups = JSON.parse(JSON.stringify(req.body));
-    if (Array.isArray(groups)) {
-      await prisma
+    const postData = JSON.parse(JSON.stringify(req.body));
+    if (Array.isArray(postData)) {
+      await this.prisma
         .$transaction(async (prisma) => {
-          for (let data of groups) {
+          for (let data of postData) {
             const _id = data.id;
             const _title = data.title;
 
-            await prisma.user.findUnique({
+            await this.prisma.user.findUnique({
               where: { id: parseInt(_id) },
             });
-            await prisma.post.update({
+            await this.prisma.post.update({
               where: { id: parseInt(_id) },
               data: { title: _title },
             });
@@ -81,15 +84,15 @@ class User_Controller {
 
     // 단일 데이터를 받을때.
     else {
-      await prisma
+      await this.prisma
         .$transaction(async (prisma) => {
-          const _id = groups.id;
-          const _title = groups.title;
+          const _id = postData.id;
+          const _title = postData.title;
 
-          await prisma.user.findUnique({
+          await this.prisma.user.findUnique({
             where: { id: parseInt(_id) },
           });
-          await prisma.post.update({
+          await this.prisma.post.update({
             where: { id: parseInt(_id) },
             data: { title: _title },
           });
@@ -103,4 +106,4 @@ class User_Controller {
   /* ------------------------------------------------------------------------------------- */
 }
 
-module.exports = User_Controller;
+module.exports = UserController;
