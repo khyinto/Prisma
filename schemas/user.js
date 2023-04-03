@@ -7,18 +7,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  age: {
-    type: Number,
+  email: {
+    type: String,
     required: true,
-  },
-  married: {
-    type: Boolean,
-    required: true,
-  },
-  comment: String,
-  createAt: {
-    type: Date,
-    default: Date.now(),
   },
 });
 

@@ -1,5 +1,6 @@
 const utils = require("../lib/utils");
 const express = require("express");
+const mongo_api = require("../MongoDB_Model/user");
 
 class UserController {
   constructor(prisma) {
@@ -24,6 +25,9 @@ class UserController {
     }
 
     utils.Success(res, users);
+    mongo_api.API("path hhh");
+
+    //modelApi.create({ name: "api path" });
   }
   /* ------------------------------------------------------------------------------------- */
 
@@ -48,6 +52,7 @@ class UserController {
           },
         });
         utils.Success(res, "Successfully created");
+        utils.NDB_Create(name, email);
       })
       .catch((error) => {
         utils.Error(res, "Error creating user");

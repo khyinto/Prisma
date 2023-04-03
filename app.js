@@ -6,14 +6,17 @@ const { PrismaClient } = require("@prisma/client");
 
 let bodyParser = require("body-parser");
 
-const userRouter = require("./routes/user");
 const userController = require("./controllers/user_controller");
 
-const { connectToDatabase } = require("./schemas/index");
+//const { connectToDatabase } = require("./schemas/index");
+
+const mongoose = require("mongoose");
 
 const app = express();
 
-if (cluster.isMaster) {
+/*
+if (cluster.isMaster) 
+{
   const numWorkers = os.cpus().length;
 
   console.log(`Master cluster setting up ${numWorkers} workers...`);
@@ -33,7 +36,9 @@ if (cluster.isMaster) {
     console.log("Starting a new worker");
     cluster.fork();
   });
-} else {
+} 
+else */
+{
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(bodyParser.urlencoded({ extended: false, limit: "2mb" })); //파서(기본)
@@ -44,8 +49,15 @@ if (cluster.isMaster) {
   const user_controller = new userController(prisma);
   app.use("/users", user_controller.router);
 
+  mongoose
+    .connect("mongodb://127.0.0.1:27017/nodejs")
+    .then(() => {
+      console.log("Connected to");
+    })
+    .catch((error) => handleError(error));
+
   app.listen(3000, () => {
     console.log(`Server running on process ${process.pid}`);
-    connectToDatabase();
+    //connectToDatabase();
   });
 }
